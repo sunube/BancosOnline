@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view>
+    <columns>
+        <group name="data" title="banco" icon="fa-solid fa-university" numcolumns="12">
+            <column name="nombre" title="nombre" numcolumns="6" order="10">
+                <widget type="text" fieldname="nombre" required="true" icon="fa-solid fa-university"/>
+            </column>
+            <column name="color" title="color" numcolumns="3" order="20">
+                <widget type="color" fieldname="color"/>
+            </column>
+            <column name="logo_url" title="bancos-online-logo-url" numcolumns="6" order="30">
+                <widget type="url" fieldname="logo_url" icon="fa-solid fa-image"/>
+            </column>
+        </group>
+    </columns>
+</view>

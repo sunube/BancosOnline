@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view>
+    <columns>
+        <group name="data" title="cuenta-bancaria" icon="fa-solid fa-credit-card" numcolumns="12">
+            <column name="id" display="none" order="10">
+                <widget type="text" fieldname="id"/>
+            </column>
+            <column name="nombre" title="nombre" numcolumns="6" order="20">
+                <widget type="text" fieldname="nombre" icon="fa-solid fa-tag"/>
+            </column>
+            <column name="idempresa" title="company" numcolumns="6" order="30">
+                <widget type="select" fieldname="idempresa">
+                    <values source="empresas" fieldcode="idempresa" fieldtitle="nombrecorto"/>
+                </widget>
+            </column>
+            <column name="banco" title="banco" numcolumns="4" order="40">
+                <widget type="text" fieldname="banco" readonly="true"/>
+            </column>
+            <column name="iban" title="IBAN" numcolumns="4" order="50">
+                <widget type="text" fieldname="iban" readonly="true"/>
+            </column>
+            <column name="moneda" title="moneda" numcolumns="2" order="60">
+                <widget type="text" fieldname="moneda" readonly="true"/>
+            </column>
+            <column name="tipo_cuenta" title="bancos-online-tipo-cuenta" numcolumns="2" order="70">
+                <widget type="text" fieldname="tipo_cuenta" readonly="true"/>
+            </column>
+        </group>
+        <group name="saldo" title="saldo" icon="fa-solid fa-euro-sign" numcolumns="12">
+            <column name="saldo" title="saldo" numcolumns="4" order="100">
+                <widget type="money" fieldname="saldo" readonly="true"/>
+            </column>
+            <column name="saldo_moneda" title="moneda" numcolumns="2" order="110">
+                <widget type="text" fieldname="saldo_moneda" readonly="true"/>
+            </column>
+            <column name="last_sync" title="bancos-online-last-sync" numcolumns="4" order="120">
+                <widget type="datetime" fieldname="last_sync" readonly="true"/>
+            </column>
+        </group>
+    </columns>
+</view>

@@ -35,5 +35,9 @@
     "cuenta": "Cuenta",
     "periodo": "Periodo",
     "activo": "Activo",
-    "company": "Empresa"
+    "company": "Empresa",
+    "cuenta-bancaria": "Cuenta Bancaria",
+    "bancos-online-tipo-cuenta": "Tipo de cuenta",
+    "bancos-online-logo-url": "URL del logo",
+    "color": "Color"
 }
