@@ -96,7 +96,14 @@ class BancosOnline extends Controller
             case 'set-company':
                 $this->setAccountCompany();
                 break;
+
+            case 'get-banks':
+                $this->getAvailableBanks($config);
+                return;
         }
+
+        // Cargar bancos disponibles para el modal de conexion
+        $this->loadBancosDisponibles($config);
 
         // Cargar datos del dashboard
         $this->loadDashboard();
@@ -183,6 +190,70 @@ class BancosOnline extends Controller
 
         $this->saldosPorEmpresa = array_values($porEmpresa);
         $this->saldosPorBanco = array_values($porBanco);
+    }
+
+    // ─── Bancos disponibles ────────────────────────────────────
+
+    /**
+     * Carga la lista de bancos disponibles desde Enable Banking API.
+     * Se cachea en sesion para no llamar a la API en cada carga de pagina.
+     */
+    private function loadBancosDisponibles(BancoOnlineConfig $config): void
+    {
+        try {
+            $api = EnableBankingAPI::fromConfig($config);
+            $aspsps = $api->getAspsps('ES');
+
+            $this->bancosDisponibles = [];
+            foreach ($aspsps as $aspsp) {
+                $this->bancosDisponibles[] = [
+                    'name' => $aspsp['name'] ?? '',
+                    'country' => $aspsp['country'] ?? 'ES',
+                    'logo' => $aspsp['logo'] ?? '',
+                    'bic' => $aspsp['bic'] ?? '',
+                ];
+            }
+
+            // Ordenar por nombre
+            usort($this->bancosDisponibles, function ($a, $b) {
+                return strcasecmp($a['name'], $b['name']);
+            });
+        } catch (\Exception $e) {
+            // Si falla la API, el desplegable estara vacio pero no bloqueamos el dashboard
+            Tools::log()->warning('No se pudieron cargar los bancos disponibles: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * AJAX: devuelve bancos disponibles para un pais en formato JSON.
+     */
+    private function getAvailableBanks(BancoOnlineConfig $config): void
+    {
+        $this->setTemplate(false);
+        $country = $this->request->query->get('country', 'ES');
+
+        try {
+            $api = EnableBankingAPI::fromConfig($config);
+            $aspsps = $api->getAspsps($country);
+
+            $banks = [];
+            foreach ($aspsps as $aspsp) {
+                $banks[] = [
+                    'name' => $aspsp['name'] ?? '',
+                    'country' => $aspsp['country'] ?? $country,
+                    'logo' => $aspsp['logo'] ?? '',
+                    'bic' => $aspsp['bic'] ?? '',
+                ];
+            }
+
+            usort($banks, function ($a, $b) {
+                return strcasecmp($a['name'], $b['name']);
+            });
+
+            $this->response->setContent(json_encode(['ok' => true, 'banks' => $banks]));
+        } catch (\Exception $e) {
+            $this->response->setContent(json_encode(['ok' => false, 'error' => $e->getMessage()]));
+        }
     }
 
     // ─── Acciones ────────────────────────────────────────────────

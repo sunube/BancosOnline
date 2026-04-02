@@ -34,7 +34,7 @@
         <div class="col-md-6 text-right">
             {# Filtro por empresa #}
             <form method="get" action="BancosOnline" class="form-inline justify-content-end">
-                <select name="idempresa" class="form-control form-control-sm me-2" onchange="this.form.submit()">
+                <select name="idempresa" class="form-select form-select-sm me-2" onchange="this.form.submit()">
                     <option value="">-- Todas las empresas --</option>
                     {% for emp in fsc.empresas %}
                     <option value="{{ emp.idempresa }}" {{ fsc.idempresa == emp.idempresa ? 'selected' : '' }}>
@@ -251,46 +251,72 @@
     {% endif %}
 
     {# ═══ MODAL CONECTAR BANCO ═══ #}
-    <div class="modal fade" id="connectModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" id="connectModal" tabindex="-1">
+        <div class="modal-dialog">
             <div class="modal-content">
-                <form method="post" action="BancosOnline">
+                <form method="post" action="BancosOnline" id="connectBankForm">
                     <input type="hidden" name="action" value="connect"/>
                     <div class="modal-header">
                         <h5 class="modal-title"><i class="fa-solid fa-university"></i> Conectar Banco</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label>Nombre del banco (tal como aparece en Enable Banking)</label>
-                            <input type="text" name="bank_name" class="form-control" required
-                                placeholder="Ej: Banco Sabadell, Banco Santander, Wise..."/>
-                            <small class="form-text text-muted">
-                                Debe coincidir exactamente con el nombre en Enable Banking.
-                            </small>
-                        </div>
-                        <div class="form-group">
-                            <label>Pais</label>
-                            <select name="country" class="form-control">
+                        <div class="mb-3">
+                            <label class="form-label">Pais</label>
+                            <select name="country" id="connectCountry" class="form-select">
                                 <option value="ES" selected>Espana</option>
-                                <option value="BE">Belgica</option>
-                                <option value="LT">Lituania</option>
                                 <option value="PT">Portugal</option>
                                 <option value="FR">Francia</option>
                                 <option value="DE">Alemania</option>
                                 <option value="IT">Italia</option>
+                                <option value="BE">Belgica</option>
+                                <option value="NL">Paises Bajos</option>
+                                <option value="AT">Austria</option>
+                                <option value="IE">Irlanda</option>
+                                <option value="LT">Lituania</option>
+                                <option value="LV">Letonia</option>
+                                <option value="EE">Estonia</option>
+                                <option value="FI">Finlandia</option>
+                                <option value="SE">Suecia</option>
+                                <option value="NO">Noruega</option>
+                                <option value="DK">Dinamarca</option>
+                                <option value="PL">Polonia</option>
+                                <option value="GB">Reino Unido</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label>Tipo de cuenta</label>
-                            <select name="psu_type" class="form-control">
+                        <div class="mb-3">
+                            <label class="form-label">Banco</label>
+                            <div class="position-relative">
+                                <input type="text" id="bankSearch" class="form-control" placeholder="Escribe para buscar..." autocomplete="off"/>
+                                <input type="hidden" name="bank_name" id="bankNameHidden" required/>
+                                <div id="bankDropdown" class="list-group position-absolute w-100 shadow-sm" style="z-index: 1050; max-height: 250px; overflow-y: auto; display: none;"></div>
+                            </div>
+                            <div id="bankSelected" class="mt-2" style="display: none;">
+                                <span class="badge bg-primary fs-6 p-2" id="bankSelectedBadge">
+                                    <img id="bankSelectedLogo" src="" alt="" style="height: 18px; width: auto; margin-right: 6px; display: none;"/>
+                                    <span id="bankSelectedName"></span>
+                                    <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.6rem;" onclick="clearBankSelection()"></button>
+                                </span>
+                            </div>
+                            <div id="bankLoading" class="text-muted mt-1" style="display: none;">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Cargando bancos...
+                            </div>
+                            <small class="form-text text-muted" id="bankCount">
+                                {% if fsc.bancosDisponibles | length > 0 %}
+                                    {{ fsc.bancosDisponibles | length }} bancos disponibles
+                                {% endif %}
+                            </small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tipo de cuenta</label>
+                            <select name="psu_type" class="form-select">
                                 <option value="business" selected>Empresa</option>
                                 <option value="personal">Personal</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label>Asignar a empresa</label>
-                            <select name="idempresa" class="form-control">
+                        <div class="mb-3">
+                            <label class="form-label">Asignar a empresa</label>
+                            <select name="idempresa" class="form-select">
                                 <option value="">-- Sin asignar --</option>
                                 {% for emp in fsc.empresas %}
                                 <option value="{{ emp.idempresa }}">{{ emp.nombrecorto }}</option>
@@ -300,7 +326,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-success" id="connectSubmitBtn" disabled>
                             <i class="fa-solid fa-plug"></i> Conectar
                         </button>
                     </div>
@@ -316,6 +342,131 @@
 
 {% block javascripts %}
 {{ parent() }}
+{% if fsc.configured %}
+<script>
+// ─── Selector de bancos con busqueda ─────────────────
+var allBanks = {{ fsc.bancosDisponibles | json_encode | raw }};
+var bankSearchInput = document.getElementById('bankSearch');
+var bankDropdown = document.getElementById('bankDropdown');
+var bankNameHidden = document.getElementById('bankNameHidden');
+var bankSelected = document.getElementById('bankSelected');
+var bankSelectedName = document.getElementById('bankSelectedName');
+var bankSelectedLogo = document.getElementById('bankSelectedLogo');
+var connectSubmitBtn = document.getElementById('connectSubmitBtn');
+var bankCount = document.getElementById('bankCount');
+var bankLoading = document.getElementById('bankLoading');
+
+function renderBankList(filter) {
+    var html = '';
+    var term = (filter || '').toLowerCase();
+    var count = 0;
+
+    for (var i = 0; i < allBanks.length; i++) {
+        var bank = allBanks[i];
+        var name = bank.name || '';
+        if (term && name.toLowerCase().indexOf(term) === -1) continue;
+        if (count >= 50) break;
+
+        var logoHtml = bank.logo
+            ? '<img src="' + bank.logo + '" alt="" style="height: 20px; width: auto; margin-right: 8px;" onerror="this.style.display=\'none\'">'
+            : '<i class="fa-solid fa-university me-2 text-muted"></i>';
+
+        html += '<a href="#" class="list-group-item list-group-item-action d-flex align-items-center py-2" '
+            + 'data-bank-name="' + name.replace(/"/g, '&quot;') + '" '
+            + 'data-bank-logo="' + (bank.logo || '').replace(/"/g, '&quot;') + '">'
+            + logoHtml + '<span>' + name + '</span></a>';
+        count++;
+    }
+
+    if (count === 0) {
+        html = '<div class="list-group-item text-muted py-2"><i class="fa-solid fa-search me-2"></i>No se encontraron bancos</div>';
+    }
+
+    bankDropdown.innerHTML = html;
+    bankDropdown.style.display = 'block';
+
+    // Añadir click a cada opcion
+    var items = bankDropdown.querySelectorAll('[data-bank-name]');
+    for (var j = 0; j < items.length; j++) {
+        items[j].addEventListener('click', function(e) {
+            e.preventDefault();
+            selectBank(this.getAttribute('data-bank-name'), this.getAttribute('data-bank-logo'));
+        });
+    }
+}
+
+function selectBank(name, logo) {
+    bankNameHidden.value = name;
+    bankSelectedName.textContent = name;
+    if (logo) {
+        bankSelectedLogo.src = logo;
+        bankSelectedLogo.style.display = 'inline';
+    } else {
+        bankSelectedLogo.style.display = 'none';
+    }
+    bankSelected.style.display = 'block';
+    bankSearchInput.value = '';
+    bankDropdown.style.display = 'none';
+    bankSearchInput.style.display = 'none';
+    connectSubmitBtn.disabled = false;
+}
+
+function clearBankSelection() {
+    bankNameHidden.value = '';
+    bankSelected.style.display = 'none';
+    bankSearchInput.style.display = 'block';
+    bankSearchInput.value = '';
+    bankSearchInput.focus();
+    connectSubmitBtn.disabled = true;
+}
+
+if (bankSearchInput) {
+    bankSearchInput.addEventListener('input', function() {
+        renderBankList(this.value);
+    });
+
+    bankSearchInput.addEventListener('focus', function() {
+        renderBankList(this.value);
+    });
+
+    // Cerrar dropdown al hacer click fuera
+    document.addEventListener('click', function(e) {
+        if (!bankSearchInput.contains(e.target) && !bankDropdown.contains(e.target)) {
+            bankDropdown.style.display = 'none';
+        }
+    });
+}
+
+// Al cambiar pais, recargar bancos via AJAX
+var countrySelect = document.getElementById('connectCountry');
+if (countrySelect) {
+    countrySelect.addEventListener('change', function() {
+        var country = this.value;
+        clearBankSelection();
+        bankLoading.style.display = 'block';
+        bankCount.textContent = '';
+        allBanks = [];
+
+        fetch('BancosOnline?action=get-banks&country=' + encodeURIComponent(country))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                bankLoading.style.display = 'none';
+                if (data.ok && data.banks) {
+                    allBanks = data.banks;
+                    bankCount.textContent = allBanks.length + ' bancos disponibles';
+                } else {
+                    bankCount.textContent = 'Error al cargar bancos';
+                }
+            })
+            .catch(function() {
+                bankLoading.style.display = 'none';
+                bankCount.textContent = 'Error de conexion';
+            });
+    });
+}
+</script>
+{% endif %}
+
 {% if fsc.configured and fsc.totalesMensuales | length > 0 %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <script>
