@@ -1,0 +1,411 @@
+{% extends "Master/MenuBghTemplate.html.twig" %}
+
+{% block body %}
+<div class="container-fluid">
+
+    {# ═══ NO CONFIGURADO ═══ #}
+    {% if not fsc.configured %}
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="alert alert-warning">
+                <i class="fa-solid fa-exclamation-triangle mr-2"></i>
+                <strong>Enable Banking no esta configurado.</strong>
+                <a href="ConfigBancosOnline" class="alert-link ml-2">
+                    <i class="fa-solid fa-gear"></i> Ir a Configuracion
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+
+    {# ═══ BARRA SUPERIOR ═══ #}
+    <div class="row mt-3 mb-3">
+        <div class="col-md-6">
+            <h2 class="mb-0">
+                <i class="fa-solid fa-university text-primary"></i>
+                {{ i18n.trans('bancos-online') }}
+            </h2>
+            {% if fsc.lastSync %}
+            <small class="text-muted">
+                <i class="fa-solid fa-clock"></i> Ultima sync: {{ fsc.lastSync }}
+            </small>
+            {% endif %}
+        </div>
+        <div class="col-md-6 text-right">
+            {# Filtro por empresa #}
+            <form method="get" action="BancosOnline" class="form-inline justify-content-end">
+                <select name="idempresa" class="form-control form-control-sm mr-2" onchange="this.form.submit()">
+                    <option value="">-- Todas las empresas --</option>
+                    {% for emp in fsc.empresas %}
+                    <option value="{{ emp.idempresa }}" {{ fsc.idempresa == emp.idempresa ? 'selected' : '' }}>
+                        {{ emp.nombrecorto }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </form>
+            <div class="btn-group mt-1">
+                <form method="post" action="BancosOnline" class="d-inline">
+                    <input type="hidden" name="action" value="sync"/>
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="fa-solid fa-sync"></i> Sincronizar
+                    </button>
+                </form>
+                <a href="ConfigBancosOnline" class="btn btn-sm btn-secondary">
+                    <i class="fa-solid fa-gear"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {# ═══ SALDO TOTAL ═══ #}
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-primary">
+                <div class="card-body text-center">
+                    <h6 class="text-muted mb-1">Saldo Total</h6>
+                    <h2 class="mb-0 {{ fsc.saldoTotal >= 0 ? 'text-success' : 'text-danger' }}">
+                        {{ fsc.saldoTotal | number_format(2, ',', '.') }} &euro;
+                    </h2>
+                    <small class="text-muted">{{ fsc.cuentas | length }} cuenta(s)</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="text-muted mb-1">Por Empresa</h6>
+                    {% for e in fsc.saldosPorEmpresa %}
+                    <div class="d-flex justify-content-between">
+                        <span>{{ e.nombre }}</span>
+                        <strong class="{{ e.saldo >= 0 ? 'text-success' : 'text-danger' }}">
+                            {{ e.saldo | number_format(2, ',', '.') }} &euro;
+                        </strong>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="text-muted mb-1">Por Banco</h6>
+                    {% for b in fsc.saldosPorBanco %}
+                    <div class="d-flex justify-content-between">
+                        <span>
+                            {% if b.logo %}
+                            <img src="{{ b.logo }}" alt="" style="height: 16px; width: auto; margin-right: 4px;"/>
+                            {% endif %}
+                            {{ b.nombre }}
+                        </span>
+                        <strong class="{{ b.saldo >= 0 ? 'text-success' : 'text-danger' }}">
+                            {{ b.saldo | number_format(2, ',', '.') }} &euro;
+                        </strong>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ═══ TARJETAS DE CUENTAS ═══ #}
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5><i class="fa-solid fa-credit-card"></i> Cuentas Bancarias</h5>
+                <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#connectModal">
+                    <i class="fa-solid fa-plus"></i> Conectar Banco
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-3">
+        {% for c in fsc.cuentas %}
+        <div class="col-md-4 col-lg-3 mb-3">
+            <div class="card shadow-sm h-100" style="border-left: 4px solid {{ c.banco_color | default('#6366f1') }};">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <small class="text-muted">{{ c.banco }}</small>
+                            <br/>
+                            <strong>{{ c.iban }}</strong>
+                        </div>
+                        <div>
+                            {% if c.banco_logo %}
+                            <img src="{{ c.banco_logo }}" alt="{{ c.banco }}" style="height: 24px;"/>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if c.nombre %}
+                    <small class="text-muted d-block">{{ c.nombre }}</small>
+                    {% endif %}
+                    <h4 class="mt-2 mb-1 {{ c.saldo >= 0 ? 'text-success' : 'text-danger' }}">
+                        {{ c.saldo | number_format(2, ',', '.') }} {{ c.saldo_moneda | default('EUR') }}
+                    </h4>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            {{ c.empresa_nombre | default('Sin asignar') }}
+                        </small>
+                        <div class="btn-group btn-group-sm">
+                            <form method="post" action="BancosOnline" class="d-inline">
+                                <input type="hidden" name="action" value="delete-account"/>
+                                <input type="hidden" name="idcuenta" value="{{ c.id }}"/>
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Eliminar esta cuenta y sus movimientos?');">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% if c.last_sync %}
+                    <small class="text-muted d-block mt-1">
+                        <i class="fa-solid fa-clock"></i> {{ c.last_sync }}
+                    </small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                No hay cuentas bancarias conectadas.
+                <button class="btn btn-sm btn-success ml-2" data-toggle="modal" data-target="#connectModal">
+                    <i class="fa-solid fa-plus"></i> Conectar banco
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {# ═══ MOVIMIENTOS RECIENTES ═══ #}
+    {% if fsc.movimientosRecientes | length > 0 %}
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fa-solid fa-exchange-alt"></i> Movimientos Recientes</h5>
+                    <a href="ListBancoOnlineMovimiento" class="btn btn-sm btn-outline-primary">
+                        Ver todos <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Banco</th>
+                                <th>IBAN</th>
+                                <th>Descripcion</th>
+                                <th>Contraparte</th>
+                                <th class="text-right">Importe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in fsc.movimientosRecientes %}
+                            <tr>
+                                <td>{{ m.fecha }}</td>
+                                <td>
+                                    <span class="badge" style="background-color: {{ m.banco_color | default('#6366f1') }}; color: #fff;">
+                                        {{ m.banco }}
+                                    </span>
+                                </td>
+                                <td><small>{{ m.iban }}</small></td>
+                                <td>{{ m.descripcion | length > 60 ? m.descripcion[:60] ~ '...' : m.descripcion }}</td>
+                                <td>{{ m.contraparte }}</td>
+                                <td class="text-right {{ m.importe >= 0 ? 'text-success' : 'text-danger' }}">
+                                    <strong>{{ m.importe | number_format(2, ',', '.') }} &euro;</strong>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ═══ GRAFICOS: TOTALES MENSUALES ═══ #}
+    {% if fsc.totalesMensuales | length > 0 %}
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fa-solid fa-chart-bar"></i> Ingresos vs Gastos (6 meses)</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartMensual" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fa-solid fa-chart-area"></i> Flujo Diario (30 dias)</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartDiario" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ═══ MODAL CONECTAR BANCO ═══ #}
+    <div class="modal fade" id="connectModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form method="post" action="BancosOnline">
+                    <input type="hidden" name="action" value="connect"/>
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fa-solid fa-university"></i> Conectar Banco</h5>
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Nombre del banco (tal como aparece en Enable Banking)</label>
+                            <input type="text" name="bank_name" class="form-control" required
+                                placeholder="Ej: Banco Sabadell, Banco Santander, Wise..."/>
+                            <small class="form-text text-muted">
+                                Debe coincidir exactamente con el nombre en Enable Banking.
+                            </small>
+                        </div>
+                        <div class="form-group">
+                            <label>Pais</label>
+                            <select name="country" class="form-control">
+                                <option value="ES" selected>Espana</option>
+                                <option value="BE">Belgica</option>
+                                <option value="LT">Lituania</option>
+                                <option value="PT">Portugal</option>
+                                <option value="FR">Francia</option>
+                                <option value="DE">Alemania</option>
+                                <option value="IT">Italia</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de cuenta</label>
+                            <select name="psu_type" class="form-control">
+                                <option value="business" selected>Empresa</option>
+                                <option value="personal">Personal</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Asignar a empresa</label>
+                            <select name="idempresa" class="form-control">
+                                <option value="">-- Sin asignar --</option>
+                                {% for emp in fsc.empresas %}
+                                <option value="{{ emp.idempresa }}">{{ emp.nombrecorto }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fa-solid fa-plug"></i> Conectar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% endif %} {# fin configured #}
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{% if fsc.configured and fsc.totalesMensuales | length > 0 %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ─── Grafico Mensual ─────────────────────
+    var monthlyData = {{ fsc.totalesMensuales | json_encode | raw }};
+    var ctxM = document.getElementById('chartMensual');
+    if (ctxM && monthlyData.length > 0) {
+        new Chart(ctxM.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: monthlyData.map(function(d) { return d.mes; }),
+                datasets: [
+                    {
+                        label: 'Ingresos',
+                        data: monthlyData.map(function(d) { return parseFloat(d.ingresos || 0); }),
+                        backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                        borderColor: '#10b981',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Gastos',
+                        data: monthlyData.map(function(d) { return parseFloat(d.gastos || 0); }),
+                        backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                        borderColor: '#ef4444',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) { return value.toLocaleString('es-ES') + ' \u20ac'; }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // ─── Grafico Flujo Diario ────────────────
+    var dailyData = {{ fsc.flujoDiario | json_encode | raw }};
+    var ctxD = document.getElementById('chartDiario');
+    if (ctxD && dailyData.length > 0) {
+        new Chart(ctxD.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: dailyData.map(function(d) { return d.fecha; }),
+                datasets: [
+                    {
+                        label: 'Ingresos',
+                        data: dailyData.map(function(d) { return parseFloat(d.ingresos || 0); }),
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Gastos',
+                        data: dailyData.map(function(d) { return parseFloat(d.gastos || 0); }),
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) { return value.toLocaleString('es-ES') + ' \u20ac'; }
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

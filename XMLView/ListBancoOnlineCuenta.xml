@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view>
+    <columns>
+        <group name="data">
+            <column name="id" display="none" order="10">
+                <widget type="text" fieldname="id"/>
+            </column>
+            <column name="banco" order="20">
+                <widget type="text" fieldname="banco"/>
+            </column>
+            <column name="iban" order="30" numcolumns="3">
+                <widget type="text" fieldname="iban"/>
+            </column>
+            <column name="nombre" order="40">
+                <widget type="text" fieldname="nombre"/>
+            </column>
+            <column name="moneda" order="50">
+                <widget type="text" fieldname="moneda"/>
+            </column>
+            <column name="saldo" order="60">
+                <widget type="money" fieldname="saldo"/>
+            </column>
+            <column name="empresa" order="70">
+                <widget type="select" fieldname="idempresa">
+                    <values source="empresas" fieldcode="idempresa" fieldtitle="nombrecorto"/>
+                </widget>
+            </column>
+            <column name="ultima-sync" order="80">
+                <widget type="datetime" fieldname="last_sync"/>
+            </column>
+        </group>
+    </columns>
+    <rows>
+        <row type="order">
+            <column name="banco" order="100">ASC</column>
+            <column name="iban" order="110">ASC</column>
+        </row>
+    </rows>
+</view>

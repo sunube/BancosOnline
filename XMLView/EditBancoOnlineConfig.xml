@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view>
+    <columns>
+        <group name="enablebanking" title="bancos-online-api" icon="fa-solid fa-plug" numcolumns="12">
+            <column name="id" display="none" order="10">
+                <widget type="text" fieldname="id"/>
+            </column>
+            <column name="enablebanking_app_id" title="bancos-online-app-id" description="bancos-online-app-id-help" numcolumns="6" order="100">
+                <widget type="text" fieldname="enablebanking_app_id" required="true" icon="fa-solid fa-key"/>
+            </column>
+            <column name="enablebanking_key_path" title="bancos-online-key-path" description="bancos-online-key-path-help" numcolumns="6" order="110">
+                <widget type="text" fieldname="enablebanking_key_path" required="true" icon="fa-solid fa-file"/>
+            </column>
+            <column name="enablebanking_redirect_url" title="bancos-online-redirect-url" description="bancos-online-redirect-url-help" numcolumns="12" order="120">
+                <widget type="url" fieldname="enablebanking_redirect_url" required="true" icon="fa-solid fa-link"/>
+            </column>
+        </group>
+        <group name="sync" title="bancos-online-sync" icon="fa-solid fa-sync" numcolumns="12">
+            <column name="sync_frecuencia" title="bancos-online-sync-freq" numcolumns="3" order="200">
+                <widget type="select" fieldname="sync_frecuencia">
+                    <values title="Cada hora">1 hour</values>
+                    <values title="Cada 2 horas">2 hours</values>
+                    <values title="Cada 4 horas">4 hours</values>
+                    <values title="Cada 6 horas">6 hours</values>
+                    <values title="Cada 12 horas">12 hours</values>
+                    <values title="Diario">daily</values>
+                </widget>
+            </column>
+            <column name="dias_historico" title="bancos-online-dias-hist" description="bancos-online-dias-hist-help" numcolumns="3" order="210">
+                <widget type="number" fieldname="dias_historico" min="7" max="365"/>
+            </column>
+            <column name="activo" title="activo" numcolumns="2" order="220">
+                <widget type="checkbox" fieldname="activo"/>
+            </column>
+        </group>
+        <group name="empresa" title="company" icon="fa-solid fa-building" numcolumns="12">
+            <column name="idempresa" title="company" numcolumns="4" order="300">
+                <widget type="select" fieldname="idempresa" required="true">
+                    <values source="empresas" fieldcode="idempresa" fieldtitle="nombrecorto"/>
+                </widget>
+            </column>
+            <column name="last_sync" title="bancos-online-last-sync" numcolumns="4" order="310">
+                <widget type="datetime" fieldname="last_sync" readonly="true"/>
+            </column>
+        </group>
+    </columns>
+</view>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table>
+    <column>
+        <name>state</name>
+        <type>character varying(100)</type>
+        <null>NO</null>
+    </column>
+    <column>
+        <name>authorization_id</name>
+        <type>character varying(200)</type>
+        <default>''</default>
+    </column>
+    <column>
+        <name>banco</name>
+        <type>character varying(100)</type>
+        <default>''</default>
+    </column>
+    <column>
+        <name>idempresa</name>
+        <type>integer</type>
+    </column>
+    <column>
+        <name>creation_date</name>
+        <type>timestamp</type>
+    </column>
+    <constraint>
+        <name>bancos_online_auth_pkey</name>
+        <type>PRIMARY KEY (state)</type>
+    </constraint>
+</table>

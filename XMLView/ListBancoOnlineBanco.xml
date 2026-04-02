@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view>
+    <columns>
+        <group name="data">
+            <column name="nombre" order="10" numcolumns="5">
+                <widget type="text" fieldname="nombre"/>
+            </column>
+            <column name="color" order="20" numcolumns="3">
+                <widget type="color" fieldname="color"/>
+            </column>
+            <column name="logo_url" order="30" numcolumns="4">
+                <widget type="url" fieldname="logo_url"/>
+            </column>
+        </group>
+    </columns>
+</view>

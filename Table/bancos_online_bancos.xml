@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table>
+    <column>
+        <name>nombre</name>
+        <type>character varying(100)</type>
+        <null>NO</null>
+    </column>
+    <column>
+        <name>color</name>
+        <type>character varying(10)</type>
+        <default>'#6366f1'</default>
+    </column>
+    <column>
+        <name>logo_url</name>
+        <type>character varying(500)</type>
+        <default>''</default>
+    </column>
+    <constraint>
+        <name>bancos_online_bancos_pkey</name>
+        <type>PRIMARY KEY (nombre)</type>
+    </constraint>
+</table>

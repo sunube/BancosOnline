@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view>
+    <columns>
+        <group name="data">
+            <column name="id" display="none" order="10">
+                <widget type="text" fieldname="id"/>
+            </column>
+            <column name="fecha" order="20">
+                <widget type="date" fieldname="fecha"/>
+            </column>
+            <column name="idcuenta" order="25">
+                <widget type="select" fieldname="idcuenta">
+                    <values source="bancos_online_cuentas" fieldcode="id" fieldtitle="iban"/>
+                </widget>
+            </column>
+            <column name="descripcion" order="30" numcolumns="3">
+                <widget type="text" fieldname="descripcion"/>
+            </column>
+            <column name="contraparte" order="40">
+                <widget type="text" fieldname="contraparte"/>
+            </column>
+            <column name="importe" order="50">
+                <widget type="money" fieldname="importe"/>
+            </column>
+            <column name="moneda" order="55" display="none">
+                <widget type="text" fieldname="moneda"/>
+            </column>
+            <column name="estado" order="60">
+                <widget type="text" fieldname="estado"/>
+            </column>
+        </group>
+    </columns>
+    <rows>
+        <row type="order">
+            <column name="fecha" order="100">DESC</column>
+        </row>
+    </rows>
+</view>
