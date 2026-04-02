@@ -33,11 +33,7 @@ class Cron extends CronClass
     private function syncAccounts(BancoOnlineConfig $config): void
     {
         try {
-            $api = new EnableBankingAPI(
-                $config->enablebanking_app_id,
-                $config->enablebanking_key_path,
-                $config->enablebanking_redirect_url
-            );
+            $api = EnableBankingAPI::fromConfig($config);
 
             $cuenta = new BancoOnlineCuenta();
             $cuentas = $cuenta->all([], [], 0, 0);

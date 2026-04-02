@@ -50,11 +50,7 @@ class CallbackBancoOnline extends Controller
         }
 
         try {
-            $api = new EnableBankingAPI(
-                $config->enablebanking_app_id,
-                $config->enablebanking_key_path,
-                $config->enablebanking_redirect_url
-            );
+            $api = EnableBankingAPI::fromConfig($config);
 
             // Crear sesion con el code del banco
             $sessionData = $api->createSession($code);

@@ -14,8 +14,8 @@
         <type>character varying(100)</type>
     </column>
     <column>
-        <name>enablebanking_key_path</name>
-        <type>character varying(500)</type>
+        <name>enablebanking_key_pem</name>
+        <type>text</type>
     </column>
     <column>
         <name>enablebanking_redirect_url</name>

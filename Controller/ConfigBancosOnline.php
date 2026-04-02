@@ -15,7 +15,7 @@ class ConfigBancosOnline extends PanelController
         $data['title'] = 'bancos-online-config';
         $data['menu'] = 'admin';
         $data['icon'] = 'fa-solid fa-gear';
-        $data['showonmenu'] = false;
+        $data['showonmenu'] = true;
         return $data;
     }
 
@@ -69,11 +69,7 @@ class ConfigBancosOnline extends PanelController
         }
 
         try {
-            $api = new EnableBankingAPI(
-                $config->enablebanking_app_id,
-                $config->enablebanking_key_path,
-                $config->enablebanking_redirect_url
-            );
+            $api = EnableBankingAPI::fromConfig($config);
 
             $result = $api->testConnection();
 

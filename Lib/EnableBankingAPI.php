@@ -15,8 +15,8 @@ class EnableBankingAPI
     /** @var string */
     private $appId;
 
-    /** @var string */
-    private $keyPath;
+    /** @var string Contenido PEM de la clave privada */
+    private $keyPem;
 
     /** @var string */
     private $redirectUrl;
@@ -27,11 +27,28 @@ class EnableBankingAPI
     /** @var int */
     private $tokenExp = 0;
 
-    public function __construct(string $appId, string $keyPath, string $redirectUrl)
+    /**
+     * @param string $appId       App ID de Enable Banking
+     * @param string $keyPem      Contenido PEM de la clave privada RSA
+     * @param string $redirectUrl URL de callback
+     */
+    public function __construct(string $appId, string $keyPem, string $redirectUrl)
     {
         $this->appId = $appId;
-        $this->keyPath = $keyPath;
+        $this->keyPem = $keyPem;
         $this->redirectUrl = $redirectUrl;
+    }
+
+    /**
+     * Crea una instancia desde el modelo de configuracion.
+     */
+    public static function fromConfig(\FacturaScripts\Plugins\BancosOnline\Model\BancoOnlineConfig $config): self
+    {
+        return new self(
+            $config->enablebanking_app_id,
+            $config->enablebanking_key_pem,
+            $config->enablebanking_redirect_url
+        );
     }
 
     // ─── JWT ─────────────────────────────────────────────────────
@@ -48,9 +65,8 @@ class EnableBankingAPI
             return $this->token;
         }
 
-        $privateKey = file_get_contents($this->keyPath);
-        if (false === $privateKey) {
-            throw new \RuntimeException('No se pudo leer la clave privada: ' . $this->keyPath);
+        if (empty($this->keyPem)) {
+            throw new \RuntimeException('La clave privada PEM esta vacia.');
         }
 
         // Header
@@ -74,7 +90,7 @@ class EnableBankingAPI
 
         $signingInput = implode('.', $segments);
 
-        $key = openssl_pkey_get_private($privateKey);
+        $key = openssl_pkey_get_private($this->keyPem);
         if (false === $key) {
             throw new \RuntimeException('Clave privada invalida: ' . openssl_error_string());
         }

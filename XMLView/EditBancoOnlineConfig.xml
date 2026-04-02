@@ -8,11 +8,11 @@
             <column name="enablebanking_app_id" title="bancos-online-app-id" description="bancos-online-app-id-help" numcolumns="6" order="100">
                 <widget type="text" fieldname="enablebanking_app_id" required="true" icon="fa-solid fa-key"/>
             </column>
-            <column name="enablebanking_key_path" title="bancos-online-key-path" description="bancos-online-key-path-help" numcolumns="6" order="110">
-                <widget type="text" fieldname="enablebanking_key_path" required="true" icon="fa-solid fa-file"/>
-            </column>
-            <column name="enablebanking_redirect_url" title="bancos-online-redirect-url" description="bancos-online-redirect-url-help" numcolumns="12" order="120">
+            <column name="enablebanking_redirect_url" title="bancos-online-redirect-url" description="bancos-online-redirect-url-help" numcolumns="6" order="110">
                 <widget type="url" fieldname="enablebanking_redirect_url" required="true" icon="fa-solid fa-link"/>
+            </column>
+            <column name="enablebanking_key_pem" title="bancos-online-key-pem" description="bancos-online-key-pem-help" numcolumns="12" order="120">
+                <widget type="textarea" fieldname="enablebanking_key_pem" required="true" rows="8"/>
             </column>
         </group>
         <group name="sync" title="bancos-online-sync" icon="fa-solid fa-sync" numcolumns="12">

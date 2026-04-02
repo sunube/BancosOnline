@@ -178,11 +178,7 @@ class BancosOnline extends Controller
     private function syncAll(BancoOnlineConfig $config): void
     {
         try {
-            $api = new EnableBankingAPI(
-                $config->enablebanking_app_id,
-                $config->enablebanking_key_path,
-                $config->enablebanking_redirect_url
-            );
+            $api = EnableBankingAPI::fromConfig($config);
 
             $cuenta = new BancoOnlineCuenta();
             $cuentas = $cuenta->all([], [], 0, 0);
@@ -258,11 +254,7 @@ class BancosOnline extends Controller
         }
 
         try {
-            $api = new EnableBankingAPI(
-                $config->enablebanking_app_id,
-                $config->enablebanking_key_path,
-                $config->enablebanking_redirect_url
-            );
+            $api = EnableBankingAPI::fromConfig($config);
 
             $state = bin2hex(random_bytes(20));
             $result = $api->startAuth($bankName, $country, $psuType, $state);

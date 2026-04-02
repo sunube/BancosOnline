@@ -20,8 +20,8 @@ class BancoOnlineConfig extends ModelClass
     /** @var string */
     public $enablebanking_app_id;
 
-    /** @var string */
-    public $enablebanking_key_path;
+    /** @var string Contenido PEM de la clave privada RSA */
+    public $enablebanking_key_pem;
 
     /** @var string */
     public $enablebanking_redirect_url;
@@ -64,21 +64,22 @@ class BancoOnlineConfig extends ModelClass
     public function test(): bool
     {
         $this->enablebanking_app_id = Tools::noHtml($this->enablebanking_app_id ?? '');
-        $this->enablebanking_key_path = Tools::noHtml($this->enablebanking_key_path ?? '');
         $this->enablebanking_redirect_url = Tools::noHtml($this->enablebanking_redirect_url ?? '');
 
+        // No aplicar noHtml al PEM porque contiene caracteres especiales
         if (empty($this->enablebanking_app_id)) {
             Tools::log()->warning('Debes introducir el App ID de Enable Banking.');
             return false;
         }
 
-        if (empty($this->enablebanking_key_path)) {
-            Tools::log()->warning('Debes introducir la ruta al fichero de clave privada (.pem).');
+        if (empty($this->enablebanking_key_pem)) {
+            Tools::log()->warning('Debes pegar el contenido de la clave privada PEM.');
             return false;
         }
 
-        if (!empty($this->enablebanking_key_path) && !file_exists($this->enablebanking_key_path)) {
-            Tools::log()->warning('El fichero de clave privada no existe: ' . $this->enablebanking_key_path);
+        // Verificar que el PEM es valido
+        if (strpos($this->enablebanking_key_pem, '-----BEGIN') === false) {
+            Tools::log()->warning('La clave PEM no parece valida. Debe empezar con -----BEGIN RSA PRIVATE KEY----- o -----BEGIN PRIVATE KEY-----');
             return false;
         }
 
@@ -110,9 +111,8 @@ class BancoOnlineConfig extends ModelClass
     public function isConfigured(): bool
     {
         return !empty($this->enablebanking_app_id)
-            && !empty($this->enablebanking_key_path)
-            && !empty($this->enablebanking_redirect_url)
-            && file_exists($this->enablebanking_key_path);
+            && !empty($this->enablebanking_key_pem)
+            && !empty($this->enablebanking_redirect_url);
     }
 
     public function url(string $type = 'auto', string $list = 'List'): string
