@@ -286,26 +286,21 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Banco</label>
-                            <div class="position-relative">
-                                <input type="text" id="bankSearch" class="form-control" placeholder="Escribe para buscar..." autocomplete="off"/>
-                                <input type="hidden" name="bank_name" id="bankNameHidden" required/>
-                                <div id="bankDropdown" class="list-group position-absolute w-100 shadow-sm" style="z-index: 1050; max-height: 250px; overflow-y: auto; display: none;"></div>
-                            </div>
-                            <div id="bankSelected" class="mt-2" style="display: none;">
-                                <span class="badge bg-primary fs-6 p-2" id="bankSelectedBadge">
-                                    <img id="bankSelectedLogo" src="" alt="" style="height: 18px; width: auto; margin-right: 6px; display: none;"/>
-                                    <span id="bankSelectedName"></span>
-                                    <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.6rem;" onclick="clearBankSelection()"></button>
-                                </span>
-                            </div>
-                            <div id="bankLoading" class="text-muted mt-1" style="display: none;">
-                                <i class="fa-solid fa-spinner fa-spin"></i> Cargando bancos...
-                            </div>
+                            <input type="text" id="bankFilter" class="form-control mb-1" placeholder="Escribe para filtrar bancos..." autocomplete="off"/>
+                            <select name="bank_name" id="bankSelect" class="form-select" size="8" required>
+                                <option value="" disabled selected>-- Selecciona un banco --</option>
+                                {% for bank in fsc.bancosDisponibles %}
+                                <option value="{{ bank.name }}">{{ bank.name }}</option>
+                                {% endfor %}
+                            </select>
                             <small class="form-text text-muted" id="bankCount">
                                 {% if fsc.bancosDisponibles | length > 0 %}
                                     {{ fsc.bancosDisponibles | length }} bancos disponibles
                                 {% endif %}
                             </small>
+                            <div id="bankLoading" class="text-muted mt-1" style="display: none;">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Cargando bancos...
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Tipo de cuenta</label>
@@ -326,7 +321,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success" id="connectSubmitBtn" disabled>
+                        <button type="submit" class="btn btn-success" id="connectSubmitBtn">
                             <i class="fa-solid fa-plug"></i> Conectar
                         </button>
                     </div>
@@ -344,126 +339,66 @@
 {{ parent() }}
 {% if fsc.configured %}
 <script>
-// ─── Selector de bancos con busqueda ─────────────────
-var allBanks = {{ fsc.bancosDisponibles | json_encode | raw }};
-var bankSearchInput = document.getElementById('bankSearch');
-var bankDropdown = document.getElementById('bankDropdown');
-var bankNameHidden = document.getElementById('bankNameHidden');
-var bankSelected = document.getElementById('bankSelected');
-var bankSelectedName = document.getElementById('bankSelectedName');
-var bankSelectedLogo = document.getElementById('bankSelectedLogo');
-var connectSubmitBtn = document.getElementById('connectSubmitBtn');
-var bankCount = document.getElementById('bankCount');
-var bankLoading = document.getElementById('bankLoading');
+document.addEventListener('DOMContentLoaded', function() {
+    var bankFilter = document.getElementById('bankFilter');
+    var bankSelect = document.getElementById('bankSelect');
+    var countrySelect = document.getElementById('connectCountry');
+    var bankCount = document.getElementById('bankCount');
+    var bankLoading = document.getElementById('bankLoading');
 
-function renderBankList(filter) {
-    var html = '';
-    var term = (filter || '').toLowerCase();
-    var count = 0;
+    if (!bankFilter || !bankSelect) return;
 
-    for (var i = 0; i < allBanks.length; i++) {
-        var bank = allBanks[i];
-        var name = bank.name || '';
-        if (term && name.toLowerCase().indexOf(term) === -1) continue;
-        if (count >= 50) break;
+    // Filtrar opciones del select al escribir
+    bankFilter.addEventListener('input', function() {
+        var term = this.value.toLowerCase();
+        var opts = bankSelect.options;
+        var visible = 0;
+        for (var i = 0; i < opts.length; i++) {
+            if (opts[i].value === '') {
+                opts[i].style.display = '';
+                continue;
+            }
+            var match = opts[i].text.toLowerCase().indexOf(term) !== -1;
+            opts[i].style.display = match ? '' : 'none';
+            if (match) visible++;
+        }
+        if (bankCount) bankCount.textContent = visible + ' bancos encontrados';
+    });
 
-        var logoHtml = bank.logo
-            ? '<img src="' + bank.logo + '" alt="" style="height: 20px; width: auto; margin-right: 8px;" onerror="this.style.display=\'none\'">'
-            : '<i class="fa-solid fa-university me-2 text-muted"></i>';
+    // Al cambiar pais, recargar bancos via AJAX
+    if (countrySelect) {
+        countrySelect.addEventListener('change', function() {
+            var country = this.value;
+            bankFilter.value = '';
+            bankSelect.innerHTML = '<option value="" disabled selected>-- Cargando... --</option>';
+            if (bankLoading) bankLoading.style.display = 'block';
+            if (bankCount) bankCount.textContent = '';
 
-        html += '<a href="#" class="list-group-item list-group-item-action d-flex align-items-center py-2" '
-            + 'data-bank-name="' + name.replace(/"/g, '&quot;') + '" '
-            + 'data-bank-logo="' + (bank.logo || '').replace(/"/g, '&quot;') + '">'
-            + logoHtml + '<span>' + name + '</span></a>';
-        count++;
-    }
-
-    if (count === 0) {
-        html = '<div class="list-group-item text-muted py-2"><i class="fa-solid fa-search me-2"></i>No se encontraron bancos</div>';
-    }
-
-    bankDropdown.innerHTML = html;
-    bankDropdown.style.display = 'block';
-
-    // Añadir click a cada opcion
-    var items = bankDropdown.querySelectorAll('[data-bank-name]');
-    for (var j = 0; j < items.length; j++) {
-        items[j].addEventListener('click', function(e) {
-            e.preventDefault();
-            selectBank(this.getAttribute('data-bank-name'), this.getAttribute('data-bank-logo'));
+            fetch('BancosOnline?action=get-banks&country=' + encodeURIComponent(country))
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (bankLoading) bankLoading.style.display = 'none';
+                    bankSelect.innerHTML = '<option value="" disabled selected>-- Selecciona un banco --</option>';
+                    if (data.ok && data.banks) {
+                        for (var i = 0; i < data.banks.length; i++) {
+                            var opt = document.createElement('option');
+                            opt.value = data.banks[i].name;
+                            opt.textContent = data.banks[i].name;
+                            bankSelect.appendChild(opt);
+                        }
+                        if (bankCount) bankCount.textContent = data.banks.length + ' bancos disponibles';
+                    } else {
+                        if (bankCount) bankCount.textContent = 'Error al cargar bancos';
+                    }
+                })
+                .catch(function() {
+                    if (bankLoading) bankLoading.style.display = 'none';
+                    bankSelect.innerHTML = '<option value="" disabled selected>-- Error de conexion --</option>';
+                    if (bankCount) bankCount.textContent = 'Error de conexion';
+                });
         });
     }
-}
-
-function selectBank(name, logo) {
-    bankNameHidden.value = name;
-    bankSelectedName.textContent = name;
-    if (logo) {
-        bankSelectedLogo.src = logo;
-        bankSelectedLogo.style.display = 'inline';
-    } else {
-        bankSelectedLogo.style.display = 'none';
-    }
-    bankSelected.style.display = 'block';
-    bankSearchInput.value = '';
-    bankDropdown.style.display = 'none';
-    bankSearchInput.style.display = 'none';
-    connectSubmitBtn.disabled = false;
-}
-
-function clearBankSelection() {
-    bankNameHidden.value = '';
-    bankSelected.style.display = 'none';
-    bankSearchInput.style.display = 'block';
-    bankSearchInput.value = '';
-    bankSearchInput.focus();
-    connectSubmitBtn.disabled = true;
-}
-
-if (bankSearchInput) {
-    bankSearchInput.addEventListener('input', function() {
-        renderBankList(this.value);
-    });
-
-    bankSearchInput.addEventListener('focus', function() {
-        renderBankList(this.value);
-    });
-
-    // Cerrar dropdown al hacer click fuera
-    document.addEventListener('click', function(e) {
-        if (!bankSearchInput.contains(e.target) && !bankDropdown.contains(e.target)) {
-            bankDropdown.style.display = 'none';
-        }
-    });
-}
-
-// Al cambiar pais, recargar bancos via AJAX
-var countrySelect = document.getElementById('connectCountry');
-if (countrySelect) {
-    countrySelect.addEventListener('change', function() {
-        var country = this.value;
-        clearBankSelection();
-        bankLoading.style.display = 'block';
-        bankCount.textContent = '';
-        allBanks = [];
-
-        fetch('BancosOnline?action=get-banks&country=' + encodeURIComponent(country))
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                bankLoading.style.display = 'none';
-                if (data.ok && data.banks) {
-                    allBanks = data.banks;
-                    bankCount.textContent = allBanks.length + ' bancos disponibles';
-                } else {
-                    bankCount.textContent = 'Error al cargar bancos';
-                }
-            })
-            .catch(function() {
-                bankLoading.style.display = 'none';
-                bankCount.textContent = 'Error de conexion';
-            });
-    });
-}
+});
 </script>
 {% endif %}
 
