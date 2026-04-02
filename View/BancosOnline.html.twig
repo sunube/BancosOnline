@@ -8,9 +8,9 @@
     <div class="row mt-3">
         <div class="col-12">
             <div class="alert alert-warning">
-                <i class="fa-solid fa-exclamation-triangle mr-2"></i>
+                <i class="fa-solid fa-exclamation-triangle me-2"></i>
                 <strong>Enable Banking no esta configurado.</strong>
-                <a href="ConfigBancosOnline" class="alert-link ml-2">
+                <a href="ConfigBancosOnline" class="alert-link ms-2">
                     <i class="fa-solid fa-gear"></i> Ir a Configuracion
                 </a>
             </div>
@@ -34,7 +34,7 @@
         <div class="col-md-6 text-right">
             {# Filtro por empresa #}
             <form method="get" action="BancosOnline" class="form-inline justify-content-end">
-                <select name="idempresa" class="form-control form-control-sm mr-2" onchange="this.form.submit()">
+                <select name="idempresa" class="form-control form-control-sm me-2" onchange="this.form.submit()">
                     <option value="">-- Todas las empresas --</option>
                     {% for emp in fsc.empresas %}
                     <option value="{{ emp.idempresa }}" {{ fsc.idempresa == emp.idempresa ? 'selected' : '' }}>
@@ -112,7 +112,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5><i class="fa-solid fa-credit-card"></i> Cuentas Bancarias</h5>
-                <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#connectModal">
+                <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#connectModal">
                     <i class="fa-solid fa-plus"></i> Conectar Banco
                 </button>
             </div>
@@ -168,7 +168,7 @@
         <div class="col-12">
             <div class="alert alert-info">
                 No hay cuentas bancarias conectadas.
-                <button class="btn btn-sm btn-success ml-2" data-toggle="modal" data-target="#connectModal">
+                <button class="btn btn-sm btn-success ms-2" data-bs-toggle="modal" data-bs-target="#connectModal">
                     <i class="fa-solid fa-plus"></i> Conectar banco
                 </button>
             </div>
@@ -258,9 +258,7 @@
                     <input type="hidden" name="action" value="connect"/>
                     <div class="modal-header">
                         <h5 class="modal-title"><i class="fa-solid fa-university"></i> Conectar Banco</h5>
-                        <button type="button" class="close" data-dismiss="modal">
-                            <span>&times;</span>
-                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
@@ -301,7 +299,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-success">
                             <i class="fa-solid fa-plug"></i> Conectar
                         </button>

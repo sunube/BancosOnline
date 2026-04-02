@@ -117,6 +117,10 @@ class BancoOnlineConfig extends ModelClass
 
     public function url(string $type = 'auto', string $list = 'List'): string
     {
-        return 'ConfigBancosOnline';
+        $code = $this->primaryColumnValue();
+        if ($type === 'list') {
+            return 'ConfigBancosOnline';
+        }
+        return empty($code) ? 'ConfigBancosOnline' : 'ConfigBancosOnline?code=' . $code;
     }
 }

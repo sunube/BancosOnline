@@ -115,6 +115,14 @@ class BancosOnline extends Controller
 
     private function loadDashboard(): void
     {
+        $db = new \FacturaScripts\Core\Base\DataBase();
+
+        // Verificar que las tablas existen antes de consultar
+        if (!$db->tableExists('bancos_online_cuentas')) {
+            Tools::log()->warning('Las tablas del plugin no se han creado. Desactiva y vuelve a activar el plugin.');
+            return;
+        }
+
         $idempresa = $this->idempresa ? (int) $this->idempresa : null;
 
         // Cuentas con detalles
@@ -122,6 +130,10 @@ class BancosOnline extends Controller
 
         // Saldo total
         $this->saldoTotal = BancoOnlineCuenta::totalBalance($idempresa);
+
+        if (!$db->tableExists('bancos_online_movimientos')) {
+            return;
+        }
 
         // Movimientos recientes
         $filters = [];

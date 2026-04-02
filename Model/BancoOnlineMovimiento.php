@@ -153,7 +153,7 @@ class BancoOnlineMovimiento extends ModelClass
         $cutoff = date('Y-m-d', strtotime("-{$months} months"));
 
         // Compatible con MySQL y PostgreSQL
-        $sql = "SELECT DATE_FORMAT(m.fecha, '%%Y-%%m') as mes,"
+        $sql = "SELECT DATE_FORMAT(m.fecha, '%Y-%m') as mes,"
             . " SUM(CASE WHEN m.importe > 0 THEN m.importe ELSE 0 END) as ingresos,"
             . " SUM(CASE WHEN m.importe < 0 THEN ABS(m.importe) ELSE 0 END) as gastos"
             . " FROM bancos_online_movimientos m"
@@ -164,7 +164,7 @@ class BancoOnlineMovimiento extends ModelClass
             $sql .= " AND c.idempresa = " . (int) $idempresa;
         }
 
-        $sql .= " GROUP BY DATE_FORMAT(m.fecha, '%%Y-%%m') ORDER BY mes";
+        $sql .= " GROUP BY mes ORDER BY mes";
 
         return $db->select($sql);
     }
