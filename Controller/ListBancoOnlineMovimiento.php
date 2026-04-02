@@ -2,6 +2,7 @@
 
 namespace FacturaScripts\Plugins\BancosOnline\Controller;
 
+use FacturaScripts\Core\Base\DataBase;
 use FacturaScripts\Core\Lib\ExtendedController\ListController;
 
 class ListBancoOnlineMovimiento extends ListController
@@ -25,11 +26,14 @@ class ListBancoOnlineMovimiento extends ListController
         $this->addOrderBy('ListBancoOnlineMovimiento', ['fecha', 'id'], 'fecha', 2);
         $this->addOrderBy('ListBancoOnlineMovimiento', ['importe'], 'importe');
 
-        // Filtros
+        // Filtro de periodo
         $this->addFilterPeriod('ListBancoOnlineMovimiento', 'fecha', 'periodo', 'fecha');
 
-        $this->addFilterSelect('ListBancoOnlineMovimiento', 'idcuenta', 'cuenta', 'idcuenta',
-            'bancos_online_cuentas', 'id', 'iban');
+        // Filtro de cuenta: construir array de valores
+        $cuentas = $this->getCuentasFilter();
+        if (!empty($cuentas)) {
+            $this->addFilterSelect('ListBancoOnlineMovimiento', 'idcuenta', 'cuenta', 'idcuenta', $cuentas);
+        }
     }
 
     protected function loadData($viewName, $view): void
@@ -39,5 +43,25 @@ class ListBancoOnlineMovimiento extends ListController
                 $view->loadData();
                 break;
         }
+    }
+
+    private function getCuentasFilter(): array
+    {
+        $result = [];
+        $db = new DataBase();
+
+        if (!$db->tableExists('bancos_online_cuentas')) {
+            return $result;
+        }
+
+        $rows = $db->select("SELECT id, iban, banco FROM bancos_online_cuentas ORDER BY banco, iban");
+        foreach ($rows as $row) {
+            $result[] = [
+                'code' => $row['id'],
+                'description' => $row['banco'] . ' - ' . $row['iban'],
+            ];
+        }
+
+        return $result;
     }
 }

@@ -57,8 +57,4 @@
         <name>bancos_online_mov_unique</name>
         <type>UNIQUE (idcuenta, tx_id)</type>
     </constraint>
-    <constraint>
-        <name>ca_bancos_online_mov_cuenta</name>
-        <type>FOREIGN KEY (idcuenta) REFERENCES bancos_online_cuentas (id) ON DELETE CASCADE ON UPDATE CASCADE</type>
-    </constraint>
 </table>

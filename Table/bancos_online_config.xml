@@ -48,8 +48,4 @@
         <name>bancos_online_config_pkey</name>
         <type>PRIMARY KEY (id)</type>
     </constraint>
-    <constraint>
-        <name>ca_bancos_online_config_empresa</name>
-        <type>FOREIGN KEY (idempresa) REFERENCES empresas (idempresa) ON DELETE CASCADE ON UPDATE CASCADE</type>
-    </constraint>
 </table>

@@ -25,9 +25,6 @@ class ConfigBancosOnline extends PanelController
 
         $this->addEditView('EditBancoOnlineConfig', 'BancoOnlineConfig', 'configuracion', 'fa-solid fa-gear');
         $this->addListView('ListBancoOnlineBanco', 'BancoOnlineBanco', 'bancos', 'fa-solid fa-university');
-
-        $this->addSearchFields('ListBancoOnlineBanco', ['nombre']);
-        $this->addOrderBy('ListBancoOnlineBanco', ['nombre'], 'nombre');
     }
 
     protected function loadData($viewName, $view)
@@ -45,6 +42,10 @@ class ConfigBancosOnline extends PanelController
 
             case 'ListBancoOnlineBanco':
                 $view->loadData();
+                break;
+
+            default:
+                parent::loadData($viewName, $view);
                 break;
         }
     }
