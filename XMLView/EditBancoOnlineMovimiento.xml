@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view>
+    <columns>
+        <group name="data" title="movimiento-bancario" icon="fa-solid fa-exchange-alt" numcolumns="12">
+            <column name="id" display="none" order="10">
+                <widget type="text" fieldname="id"/>
+            </column>
+            <column name="fecha" title="fecha" numcolumns="3" order="20">
+                <widget type="date" fieldname="fecha"/>
+            </column>
+            <column name="importe" title="importe" numcolumns="3" order="30">
+                <widget type="money" fieldname="importe"/>
+            </column>
+            <column name="moneda" title="moneda" numcolumns="2" order="40">
+                <widget type="text" fieldname="moneda" readonly="true"/>
+            </column>
+            <column name="estado" title="estado" numcolumns="2" order="50">
+                <widget type="text" fieldname="estado" readonly="true"/>
+            </column>
+            <column name="idcuenta" title="cuenta" numcolumns="6" order="60">
+                <widget type="select" fieldname="idcuenta" readonly="true">
+                    <values source="bancos_online_cuentas" fieldcode="id" fieldtitle="iban"/>
+                </widget>
+            </column>
+            <column name="descripcion" title="descripcion" numcolumns="12" order="70">
+                <widget type="textarea" fieldname="descripcion" rows="3"/>
+            </column>
+            <column name="contraparte" title="contraparte" numcolumns="6" order="80">
+                <widget type="text" fieldname="contraparte"/>
+            </column>
+            <column name="tx_id" title="bancos-online-tx-id" numcolumns="6" order="90">
+                <widget type="text" fieldname="tx_id" readonly="true"/>
+            </column>
+        </group>
+    </columns>
+</view>

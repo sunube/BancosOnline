@@ -138,6 +138,9 @@
                     {% if c.nombre %}
                     <small class="text-muted d-block">{{ c.nombre }}</small>
                     {% endif %}
+                    {% if c.categoria is defined and c.categoria and c.categoria != 'corriente' %}
+                    <span class="badge bg-secondary">{{ c.categoria }}</span>
+                    {% endif %}
                     <h4 class="mt-2 mb-1 {{ c.saldo >= 0 ? 'text-success' : 'text-danger' }}">
                         {{ c.saldo | number_format(2, ',', '.') }} {{ c.saldo_moneda | default('EUR') }}
                     </h4>
@@ -146,6 +149,9 @@
                             {{ c.empresa_nombre | default('Sin asignar') }}
                         </small>
                         <div class="btn-group btn-group-sm">
+                            <a href="EditBancoOnlineCuenta?code={{ c.id }}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
                             <form method="post" action="BancosOnline" class="d-inline">
                                 <input type="hidden" name="action" value="delete-account"/>
                                 <input type="hidden" name="idcuenta" value="{{ c.id }}"/>

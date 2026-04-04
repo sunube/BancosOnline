@@ -13,6 +13,16 @@
                     <values source="empresas" fieldcode="idempresa" fieldtitle="nombrecorto"/>
                 </widget>
             </column>
+            <column name="categoria" title="bancos-online-categoria" numcolumns="4" order="35">
+                <widget type="select" fieldname="categoria">
+                    <values title="Cuenta corriente">corriente</values>
+                    <values title="Poliza de credito">poliza</values>
+                    <values title="Cuenta de ahorro">ahorro</values>
+                    <values title="Tarjeta de credito">credito</values>
+                    <values title="Cuenta de inversion">inversion</values>
+                    <values title="Otro">otro</values>
+                </widget>
+            </column>
             <column name="banco" title="banco" numcolumns="4" order="40">
                 <widget type="text" fieldname="banco" readonly="true"/>
             </column>

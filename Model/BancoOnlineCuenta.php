@@ -36,6 +36,9 @@ class BancoOnlineCuenta extends ModelClass
     /** @var string */
     public $tipo_cuenta;
 
+    /** @var string Categoria: corriente, poliza, ahorro, credito, inversion, otro */
+    public $categoria;
+
     /** @var string */
     public $session_id;
 
@@ -58,6 +61,7 @@ class BancoOnlineCuenta extends ModelClass
     {
         parent::clear();
         $this->moneda = 'EUR';
+        $this->categoria = 'corriente';
         $this->saldo = 0;
         $this->saldo_moneda = 'EUR';
         $this->creation_date = date('Y-m-d H:i:s');

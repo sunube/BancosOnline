@@ -37,7 +37,10 @@
     "activo": "Activo",
     "company": "Empresa",
     "cuenta-bancaria": "Cuenta Bancaria",
+    "movimiento-bancario": "Movimiento Bancario",
     "bancos-online-tipo-cuenta": "Tipo de cuenta",
+    "bancos-online-categoria": "Categoria",
+    "bancos-online-tx-id": "ID Transaccion",
     "bancos-online-logo-url": "URL del logo",
     "color": "Color"
 }

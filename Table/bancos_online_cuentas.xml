@@ -40,6 +40,11 @@
         <default>''</default>
     </column>
     <column>
+        <name>categoria</name>
+        <type>character varying(50)</type>
+        <default>'corriente'</default>
+    </column>
+    <column>
         <name>session_id</name>
         <type>character varying(200)</type>
         <default>''</default>
